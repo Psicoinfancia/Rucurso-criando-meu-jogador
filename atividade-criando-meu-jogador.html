@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{overflow-x:hidden;scrollbar-gutter:stable}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0d1117;min-height:100vh;color:#fff;overflow-y:scroll}
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.screen.active{display:flex}
+#s1{background:radial-gradient(ellipse at 50% 40%,#1a3a28 0%,#0d1117 100%)}
+#s2{background:radial-gradient(ellipse at 50% 40%,#1a2a40 0%,#0d1117 100%)}
+#s3{background:#0d1117}
+#s4,#s5,#s6{background:radial-gradient(ellipse at 50% 30%,#1a3028 0%,#0d1117 100%)}
+#s7{background:radial-gradient(ellipse at 50% 50%,#1a3028 0%,#0d1117 100%)}
+.panel{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:22px;padding:28px 24px;max-width:860px;width:100%}
+h1{font-size:28px;font-weight:800;letter-spacing:-1px;text-align:center;margin-bottom:8px}
+h2{font-size:20px;font-weight:700;text-align:center;margin-bottom:6px}
+.sub{font-size:13px;color:rgba(255,255,255,0.45);text-align:center;margin-bottom:20px;line-height:1.6}
+.badge{display:inline-block;background:rgba(255,200,50,0.1);border:1px solid rgba(255,200,50,0.28);color:#ffc832;font-size:10px;font-weight:800;padding:4px 14px;border-radius:50px;margin-bottom:14px;letter-spacing:2px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ffc832,#e8960a);color:#111;font-size:14px;font-weight:800;padding:14px 32px;border-radius:50px;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 24px rgba(232,150,10,.38)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(232,150,10,.5)}
+.btn:active{transform:scale(.97)}
+.btn-green{background:linear-gradient(135deg,#4caf72,#2e7d4f);color:#fff;box-shadow:0 4px 20px rgba(46,125,79,.38)}
+.btn-ghost{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;box-shadow:none}
+.btn-sm{padding:8px 18px;font-size:12px}
+.btn-back{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.7);font-size:13px;font-weight:700;padding:10px 20px;border-radius:50px;border:none;cursor:pointer;transition:all .15s;margin-bottom:18px}
+.btn-back:hover{background:rgba(255,255,255,0.13);color:#fff}
+.prog{display:flex;gap:6px;justify-content:center;margin-bottom:22px;margin-top:28px}
+.pd{width:34px;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background .3s}
+.pd.done{background:#ffc832}
+.gender-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
+.gcard{background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.09);border-radius:20px;text-align:center;cursor:pointer;transition:all .22s;overflow:hidden;padding-bottom:14px}
+.gcard:hover{border-color:#ffc832;transform:translateY(-4px);box-shadow:0 12px 40px rgba(255,200,50,0.12)}
+.gcard .gl{font-size:14px;font-weight:800;color:rgba(255,255,255,0.85);margin-top:10px}
+.builder{display:grid;grid-template-columns:480px 1fr;gap:22px;align-items:start}
+@media(max-width:800px){.builder{grid-template-columns:1fr}}
+.avatar-stage{background:radial-gradient(ellipse at 50% 90%,rgba(255,200,50,0.07) 0%,rgba(0,0,0,0.55) 100%);border:1px solid rgba(255,255,255,0.07);border-radius:20px;width:100%;height:620px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.avatar-wrap{position:relative;width:420px;height:560px;flex-shrink:0}
+.av-base{position:absolute !important;left:50% !important;bottom:0 !important;width:420px !important;height:560px !important;object-fit:contain !important;object-position:center bottom !important;transform-origin:bottom center !important;z-index:1 !important;opacity:1 !important;pointer-events:none !important}
+.av-hair{position:absolute !important;object-fit:contain !important;object-position:center !important;z-index:3 !important;display:block !important;pointer-events:none !important}
+.av-face{position:absolute !important;object-fit:contain !important;object-position:center !important;z-index:4 !important;display:block !important;pointer-events:none !important}
+.stage-label{font-size:10px;color:rgba(255,255,255,0.28);letter-spacing:2px;text-transform:uppercase;margin-top:10px}
+.opts-panel{display:flex;flex-direction:column;gap:16px;overflow-y:auto;max-height:640px;padding-right:6px}
+.opts-panel::-webkit-scrollbar{width:4px}
+.opts-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:2px}
+.opt-lbl{font-size:10px;font-weight:800;color:#ffc832;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.opt-row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
+.skin-btn{padding:10px 18px;border-radius:50px;border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);font-size:12px;font-weight:700;color:rgba(255,255,255,0.75);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px}
+.skin-btn:hover{border-color:#ffc832}
+.skin-btn.sel{border-color:#ffc832;background:rgba(255,200,50,0.12);color:#ffc832}
+.skin-dot{width:18px;height:18px;border-radius:50%;flex-shrink:0}
+.hair-opt{width:82px;height:82px;border-radius:12px;border:2px solid rgba(255,255,255,0.1);overflow:hidden;cursor:pointer;transition:all .18s;background:#111;flex-shrink:0}
+.hair-opt img{width:100%;height:100%;object-fit:cover}
+.hair-opt:hover{border-color:#ffc832;transform:scale(1.05)}
+.hair-opt.sel{border-color:#ffc832;box-shadow:0 0 0 3px rgba(255,200,50,0.22)}
+.face-opt{width:82px;height:62px;border-radius:12px;border:2px solid rgba(255,255,255,0.1);overflow:hidden;cursor:pointer;transition:all .18s;background:#111;flex-shrink:0}
+.face-opt img{width:100%;height:100%;object-fit:cover;object-position:center}
+.face-opt:hover{border-color:#ffc832;transform:scale(1.05)}
+.face-opt.sel{border-color:#ffc832;box-shadow:0 0 0 3px rgba(255,200,50,0.22)}
+.face-opt-lbl,.hair-opt-lbl{font-size:9px;color:rgba(255,255,255,0.4);text-align:center;margin-top:4px}
+.fi{width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.13);background:rgba(255,255,255,0.05);font-size:13px;color:#fff;outline:none;font-family:inherit}
+.fi:focus{border-color:#ffc832}
+.fi::placeholder{color:rgba(255,255,255,0.28)}
+.quote{background:rgba(255,200,50,0.07);border-left:3px solid #ffc832;border-radius:0 10px 10px 0;padding:9px 14px;font-size:12px;color:rgba(255,255,255,0.55);font-style:italic;margin-top:12px;line-height:1.5}
+.pos-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:10px 0}
+.pcard{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.09);border-radius:16px;padding:18px 14px;cursor:pointer;transition:all .2s;display:flex;gap:14px;align-items:flex-start}
+.pcard:hover{border-color:#ffc832;transform:translateY(-2px)}
+.pcard.sel{border-color:#ffc832;background:rgba(255,200,50,0.08)}
+.pcard-ico{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#ffc832;flex-shrink:0}
+.pcard-name{font-size:13px;font-weight:800;color:#fff;margin-bottom:4px}
+.pcard-desc{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.4}
+.devolutiva{background:rgba(76,175,114,0.09);border:1px solid rgba(76,175,114,0.26);border-radius:14px;padding:16px;margin-top:14px;display:none}
+.devolutiva p{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6}
+.tag-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.tag{padding:9px 16px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);font-size:12px;color:rgba(255,255,255,0.62);cursor:pointer;transition:all .15s}
+.tag:hover,.tag.sel{border-color:#ffc832;color:#ffc832;background:rgba(255,200,50,0.08)}
+.tag-dif{border-color:rgba(255,100,80,0.2);color:rgba(255,190,170,0.65)}
+.tag-dif:hover,.tag-dif.sel{border-color:#ff6450;color:#ff6450;background:rgba(255,100,80,0.08)}
+.add-row{display:flex;gap:8px;margin-top:4px;margin-bottom:14px}
+.add-row .fi{flex:1;padding:8px 12px}
+.msg-box{border-radius:14px;padding:18px;margin-top:14px;display:none;text-align:center}
+.msg-pos{background:rgba(76,175,114,0.09);border:1px solid rgba(76,175,114,0.26)}
+.msg-tcc{background:rgba(100,150,255,0.08);border:1px solid rgba(100,150,255,0.2)}
+.msg-box p{font-size:13px;color:rgba(255,255,255,0.82);line-height:1.7}
+.center{text-align:center}.mt{margin-top:16px}
+
+/* ── BOTÃO MANUAL INLINE ── */
+#btnManualFloat{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#ffc832,#e8a800);color:#111;font-size:11px;font-weight:900;padding:8px 16px;border-radius:50px;border:none;cursor:pointer;box-shadow:0 3px 14px rgba(255,200,50,.4);letter-spacing:.4px;transition:transform .15s,box-shadow .15s;vertical-align:middle}
+#btnManualFloat:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,200,50,.55)}
+#btnManualFloat:active{transform:scale(.96)}
+
+/* ── MODAL OVERLAY ── */
+#manualOverlay{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+#manualOverlay.open{display:flex}
+.manual-modal{background:#fffde7;border:2.5px solid #f9a825;border-radius:24px;max-width:660px;width:100%;padding:32px 28px;color:#1a1a1a;position:relative;box-shadow:0 12px 60px rgba(0,0,0,0.5);max-height:90vh;overflow-y:auto}
+.modal-close{position:absolute;top:14px;right:16px;background:rgba(0,0,0,0.08);border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;transition:background .15s}
+.modal-close:hover{background:rgba(0,0,0,0.15)}
+.manual-header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.manual-icon{font-size:32px;flex-shrink:0}
+.manual-title{font-size:20px;font-weight:900;color:#e65100;letter-spacing:-0.5px;line-height:1.2}
+.manual-subtitle{font-size:11px;font-weight:800;color:#bf360c;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.manual-restricted{display:inline-flex;align-items:center;gap:6px;background:#e65100;color:#fff;font-size:10px;font-weight:900;padding:5px 14px;border-radius:50px;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px}
+.manual-age-box{background:#fff8e1;border:2px solid #f9a825;border-radius:14px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.manual-age-icon{font-size:28px}
+.manual-age-text{font-size:13px;font-weight:700;color:#e65100;line-height:1.4}
+.manual-age-text span{font-size:18px;font-weight:900;display:block;color:#f57f17}
+.manual-obj-box{background:rgba(249,168,37,0.1);border-left:4px solid #f9a825;border-radius:0 12px 12px 0;padding:10px 14px;margin-bottom:20px}
+.manual-obj-label{font-size:10px;font-weight:900;color:#e65100;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.manual-obj-text{font-size:13px;color:#3e2723;line-height:1.6;font-weight:600}
+.manual-steps{display:flex;flex-direction:column;gap:14px;margin-bottom:8px}
+.manual-step{display:flex;gap:14px;align-items:flex-start}
+.step-num{width:30px;height:30px;border-radius:50%;background:#f9a825;color:#1a1a1a;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-text{font-size:13px;color:#3e2723;line-height:1.65;font-weight:500}
+.step-text strong{color:#bf360c;font-weight:800}
+.manual-divider{border:none;border-top:1.5px dashed rgba(249,168,37,0.5);margin:16px 0}
+.fig-card-outer{width:280px;border-radius:14px;overflow:hidden;border:3px solid rgba(255,255,255,0.2);box-shadow:0 24px 70px rgba(0,0,0,0.65);position:relative;background:#45BFBF;flex-shrink:0}
+#globalLogo{position:absolute !important;left:0 !important;right:0 !important;margin:0 auto !important;top:42px !important;width:265px !important;height:67px !important;z-index:8000;pointer-events:none;transform:none !important}
+padding:6px 3px;border-radius:8px;border:1px solid rgba(255,200,50,0.25);background:rgba(255,200,50,0.05);color:rgba(255,200,50,0.55);font-size:9px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center}
+
+/* ── CONTROLE DE VOLUME FLUTUANTE ── */
+#volumeControl{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:rgba(13,17,23,0.88);
+  border:1px solid rgba(255,200,50,0.28);
+  border-radius:50px;
+  padding:9px 18px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.5);
+  backdrop-filter:blur(10px);
+  transition:opacity .3s;
+}
+#volumeControl:hover{opacity:1 !important}
+#volumeIco{font-size:16px;cursor:pointer;flex-shrink:0}
+#volumeSlider{
+  -webkit-appearance:none;
+  appearance:none;
+  width:110px;
+  height:4px;
+  border-radius:2px;
+  background:rgba(255,255,255,0.15);
+  outline:none;
+  cursor:pointer;
+}
+#volumeSlider::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:14px;height:14px;
+  border-radius:50%;
+  background:#ffc832;
+  cursor:pointer;
+  box-shadow:0 0 6px rgba(255,200,50,.5);
+}
+#volumeSlider::-moz-range-thumb{
+  width:14px;height:14px;
+  border-radius:50%;
+  background:#ffc832;
+  cursor:pointer;
+  border:none;
+}
+#volLabel{font-size:10px;color:rgba(255,200,50,0.7);font-weight:700;min-width:28px;text-align:right}
+
+/* ── BOTÃO IMPRIMIR ── */
+.btn-print{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:linear-gradient(135deg,#4caf72,#2e7d4f);
+  color:#fff;
+  font-size:14px;
+  font-weight:800;
+  padding:14px 32px;
+  border-radius:50px;
+  border:none;
+  cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 20px rgba(46,125,79,.38);
+}
+.btn-print:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(46,125,79,.5)}
+.btn-print:active{transform:scale(.97)}
+
+@media print{
+  #volumeControl,#btnManualFloat,.btn-back,.btn-ghost,.btn-print{display:none!important}
+  body{background:#fff!important}
+  .screen{display:none!important}
+  #s7{display:flex!important;background:#fff!important;min-height:unset}
+  .panel{border:none!important;background:#fff!important}
+  h2,p,#figTagsRow span{color:#111!important}
+  .badge{color:#e8960a!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ÁUDIO EM LOOP -->
+<audio id="bgMusic" loop autoplay preload="auto">
+  <source src="https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Shakira+-+Waka+Waka+(This+Time+For+Africa)+(Karaoke+Version)+-+Sing+King+(youtube)+(2)+(1).mp3" type="audio/mpeg">
+</audio>
+
+<!-- CONTROLE DE VOLUME FLUTUANTE -->
+<div id="volumeControl">
+  <span id="volumeIco" onclick="toggleMute()" title="Mudo/Som">🎵</span>
+  <input type="range" id="volumeSlider" min="0" max="100" value="60" oninput="setVolume(this.value)">
+  <span id="volLabel">60%</span>
+</div>
+
+<!-- LOGO -->
+<div id="globalLogo">
+  <img src="https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Logo.png" alt="Logo" style="width:100%;height:100%;object-fit:contain">
+</div>
+
+
+<!-- BOTÃO MANUAL DO PROFISSIONAL -->
+<!-- MODAL MANUAL DO PROFISSIONAL -->
+<div id="manualOverlay" onclick="fecharManualFora(event)">
+  <div class="manual-modal">
+    <button class="modal-close" onclick="fecharManual()">✕</button>
+    <div class="manual-header">
+      <div class="manual-icon">📋</div>
+      <div>
+        <div class="manual-title">Manual de Uso — Profissional</div>
+        <div class="manual-subtitle">Guia exclusivo para o terapeuta</div>
+      </div>
+    </div>
+    <div class="manual-restricted">🔒 Não ler com o paciente</div>
+
+    <div class="manual-age-box">
+      <div class="manual-age-icon">🧒</div>
+      <div class="manual-age-text">
+        <span>A partir de 6 anos</span>
+        Faixa etária recomendada para aplicação
+      </div>
+    </div>
+
+    <div class="manual-obj-box">
+      <div class="manual-obj-label">🎯 Objetivo Terapêutico</div>
+      <div class="manual-obj-text">Trabalhar a percepção de si, qualidades e dificuldades com o paciente de forma lúdica e acolhedora.</div>
+    </div>
+
+    <hr class="manual-divider">
+
+    <div class="manual-steps">
+      <div class="manual-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Para selecionar as opções, <strong>é só clicar na opção que o paciente escolher.</strong> Deixe-o guiar as escolhas com autonomia.</div>
+      </div>
+      <div class="manual-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Ao decorrer do jogo, <strong>pergunte ao paciente sobre suas escolhas:</strong> quando ele sente a presença daquelas qualidades no dia a dia? E as dificuldades, em que momentos aparecem? Utilize o <strong>questionamento socrático</strong> para aprofundar a reflexão.</div>
+      </div>
+      <div class="manual-step">
+        <div class="step-num">3</div>
+        <div class="step-text"><strong>Mantenha a brincadeira leve!</strong> Ao abordar as dificuldades, pontue que <em>todos têm dificuldades — inclusive os grandes jogadores</em>, e é por isso que eles treinam bastante. Explique que é exatamente isso que vocês farão na terapia: <strong>treinar as dificuldades juntos.</strong></div>
+      </div>
+      <div class="manual-step">
+        <div class="step-num">4</div>
+        <div class="step-text">Ao final, é gerada uma <strong>cartinha oficial</strong> com um resumo do jogo. Faça uma <strong>reflexão final</strong> sobre tudo que fizeram durante a sessão e pergunte ao paciente como ele acha que poderia melhorar suas dificuldades.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S0 — MANUAL DO PROFISSIONAL -->
+<div class="screen" id="s0" style="display:none"></div>
+
+<!-- S1 -->
+<div class="screen active" id="s1">
+  <div class="panel" style="max-width:500px;text-align:center">
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+      <svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="none" stroke="#ffc832" stroke-width="1.5" opacity=".35"/><circle cx="30" cy="30" r="18" fill="rgba(255,200,50,0.07)" stroke="#ffc832" stroke-width="1"/><text x="30" y="37" text-anchor="middle" font-size="20" fill="#ffc832">&#9733;</text></svg>
+      <button id="btnManualFloat" onclick="abrirManual()" style="position:absolute;left:calc(50% + 60px)">📋 Manual de Uso</button>
+    </div>
+    <div class="badge">Criando Meu Jogador</div>
+    <h1 style="margin-bottom:14px">Bem-vindo ao<br>Criando Meu Jogador!</h1>
+    <p style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.9;margin-bottom:28px">Antes de entrar em campo, vamos criar seu jogador!<br><br>Você vai descobrir suas qualidades, seus desafios<br>e ganhar sua figurinha oficial da Seleção da Vida.</p>
+    <button class="btn" onclick="goTo(2)">Entrar em campo!</button>
+  </div>
+</div>
+
+<!-- S2 -->
+<div class="screen" id="s2">
+  <div class="panel" style="max-width:560px">
+    <button class="btn-back" onclick="goTo(1)">&#8592; Voltar</button>
+    <div class="prog"><div class="pd done"></div><div class="pd done"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div></div>
+    <div class="badge">Passo 1 de 6</div>
+    <h2>Escolha seu jogador</h2>
+    <p class="sub">Clique no personagem que mais combina com você</p>
+    <div class="gender-row">
+      <div class="gcard" onclick="escolherGenero('menino')">
+        <div style="width:100%;height:220px;background:#111;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+          <img id="boyBaseThumb" src="" style="height:200px;object-fit:contain;object-position:bottom" alt="Menino">
+          <div id="boyPlaceholder" style="font-size:11px;color:rgba(255,255,255,0.3);position:absolute">Menino</div>
+        </div>
+        <div class="gl">Menino</div>
+      </div>
+      <div class="gcard" onclick="escolherGenero('menina')">
+        <div style="width:100%;height:220px;background:#111;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+          <img id="girlBaseThumb" src="" style="height:200px;object-fit:contain;object-position:bottom" alt="Menina">
+          <div id="girlPlaceholder" style="font-size:11px;color:rgba(255,255,255,0.3);position:absolute">Menina</div>
+        </div>
+        <div class="gl">Menina</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S3 -->
+<div class="screen" id="s3">
+  <div class="panel">
+    <button class="btn-back" onclick="goTo(2)">&#8592; Voltar</button>
+    <div class="prog"><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div></div>
+    <div class="badge" style="display:block;text-align:center;margin-bottom:14px">Passo 2 de 6 — Monte seu personagem</div>
+    <div class="builder">
+      <div>
+        <div class="avatar-stage">
+          <div class="avatar-wrap" id="avatarWrap">
+            <img id="avBase" class="av-base" src="" alt="Corpo">
+            <img id="avFace" class="av-face" src="" alt="Expressão">
+            <img id="avHair" class="av-hair" src="" alt="Cabelo">
+          </div>
+          <div class="stage-label">Seu jogador</div>
+        </div>
+        <div class="quote" id="qFrase">"Cada jogador é único — assim como você!"</div>
+      </div>
+      <div class="opts-panel">
+        <div>
+          <div class="opt-lbl">Cor da pele</div>
+          <div class="opt-row" id="grpSkin">
+            <button class="skin-btn sel" onclick="selSkin(this,'light')"><div class="skin-dot" style="background:#f0c8a0;border:1px solid rgba(255,255,255,0.2)"></div>Pele clara</button>
+            <button class="skin-btn" onclick="selSkin(this,'dark')"><div class="skin-dot" style="background:#6a3820;border:1px solid rgba(255,255,255,0.2)"></div>Pele escura</button>
+          </div>
+        </div>
+        <div><div class="opt-lbl">Cabelo</div><div class="opt-row" id="hairRow"></div></div>
+        <div><div class="opt-lbl">Expressão facial</div><div class="opt-row" id="faceRow"></div></div>
+        <div>
+          <div class="opt-lbl">Nome do jogador</div>
+          <input class="fi" id="nomeInput" type="text" placeholder="Digite seu nome..." maxlength="18">
+        </div>
+        <div class="center mt"><button class="btn btn-green" onclick="irPos()">Continuar</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S4 -->
+<div class="screen" id="s4">
+  <div class="panel">
+    <button class="btn-back" onclick="goTo(3)">&#8592; Voltar</button>
+    <div class="prog"><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div></div>
+    <div class="badge">Passo 3 de 6</div>
+    <h2>Qual posição você joga na vida?</h2>
+    <p class="sub">Todo jogador tem um jeito especial de jogar. Em qual posição você mais se identifica?</p>
+    <div class="pos-grid">
+      <div class="pcard" onclick="selPos(this,'Goleiro','Os goleiros costumam observar tudo. São atentos, cuidadosos e percebem detalhes antes dos outros.')">
+        <div class="pcard-ico">GL</div><div><div class="pcard-name">Goleiro(a)</div><div class="pcard-desc">Observa, protege e cuida</div></div>
+      </div>
+      <div class="pcard" onclick="selPos(this,'Atacante','Atacantes têm muita energia. Costumam tentar coisas novas e partir para a ação.')">
+        <div class="pcard-ico">AT</div><div><div class="pcard-name">Atacante</div><div class="pcard-desc">Energia, ação e conquistas</div></div>
+      </div>
+      <div class="pcard" onclick="selPos(this,'Zagueiro','Os zagueiros protegem o time quando as coisas ficam difíceis. São firmes e organizados.')">
+        <div class="pcard-ico">ZG</div><div><div class="pcard-name">Zagueiro(a)</div><div class="pcard-desc">Firme, protetor e organizado</div></div>
+      </div>
+      <div class="pcard" onclick="selPos(this,'Meio-campista','Os meio-campistas pensam nas jogadas e ajudam o time a funcionar. São criativos e equilibrados.')">
+        <div class="pcard-ico">MC</div><div><div class="pcard-name">Meio-campista</div><div class="pcard-desc">Criativo, equilibrado e estratégico</div></div>
+      </div>
+    </div>
+    <div class="devolutiva" id="devPos"><p id="devPosTxt"></p></div>
+    <div class="center mt" id="btnPos" style="display:none"><button class="btn btn-green" onclick="goTo(5)">Continuar</button></div>
+  </div>
+</div>
+
+<!-- S5 -->
+<div class="screen" id="s5">
+  <div class="panel" style="max-width:680px">
+    <button class="btn-back" onclick="goTo(4)">&#8592; Voltar</button>
+    <div class="prog"><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd"></div><div class="pd"></div></div>
+    <div class="badge">Passo 4 de 6</div>
+    <h2>Seus Pontos Fortes</h2>
+    <p class="sub">Todo jogador tem pontos fortes! Escolha ou escreva as qualidades que fazem parte do seu time.</p>
+    <div class="tag-grid" id="tagsFortes">
+      <div class="tag" onclick="this.classList.toggle('sel')">Corajoso(a)</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Criativo(a)</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Engraçado(a)</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Inteligente</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Rápido(a)</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Cuidadoso(a)</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Amigo(a)</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Persistente</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Calmo(a)</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Observador(a)</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Gentil</div>
+      <div class="tag" onclick="this.classList.toggle('sel')">Determinado(a)</div>
+    </div>
+    <div class="add-row">
+      <input class="fi" id="fortesInput" placeholder="Escreva outra qualidade..." maxlength="30">
+      <button class="btn btn-sm" onclick="addTag('fortes')">Adicionar</button>
+    </div>
+    <div class="center mt"><button class="btn" onclick="mostrarFortes()">Ver minha mensagem</button></div>
+    <div class="msg-box msg-pos" id="msgFortes"><p id="msgFortesTxt"></p></div>
+    <div class="center mt" id="btnFortes" style="display:none"><button class="btn btn-green" onclick="goTo(6)">Continuar</button></div>
+  </div>
+</div>
+
+<!-- S6 -->
+<div class="screen" id="s6">
+  <div class="panel" style="max-width:680px">
+    <button class="btn-back" onclick="goTo(5)">&#8592; Voltar</button>
+    <div class="prog"><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd"></div></div>
+    <div class="badge">Passo 5 de 6</div>
+    <h2>O que ainda estou treinando</h2>
+    <p class="sub">Até os melhores jogadores têm desafios. Aqui é um espaço seguro.</p>
+    <div class="tag-grid" id="tagsDif">
+      <div class="tag tag-dif" onclick="this.classList.toggle('sel')">Fico nervoso(a) fácil</div>
+      <div class="tag tag-dif" onclick="this.classList.toggle('sel')">Penso demais</div>
+      <div class="tag tag-dif" onclick="this.classList.toggle('sel')">Desisto rápido</div>
+      <div class="tag tag-dif" onclick="this.classList.toggle('sel')">Tenho medo de errar</div>
+      <div class="tag tag-dif" onclick="this.classList.toggle('sel')">Fico bravo(a) rápido</div>
+      <div class="tag tag-dif" onclick="this.classList.toggle('sel')">Sou muito tímido(a)</div>
+      <div class="tag tag-dif" onclick="this.classList.toggle('sel')">Tenho dificuldade para esperar</div>
+      <div class="tag tag-dif" onclick="this.classList.toggle('sel')">Me distraio fácil</div>
+    </div>
+    <div class="add-row">
+      <input class="fi" id="difInput" placeholder="Escreva outro desafio..." maxlength="30">
+      <button class="btn btn-sm" onclick="addTag('dif')">Adicionar</button>
+    </div>
+    <div class="center mt"><button class="btn" onclick="mostrarTCC()">Ver minha mensagem</button></div>
+    <div class="msg-box msg-tcc" id="msgTCC"><p id="msgTCCTxt"></p></div>
+    <div class="center mt" id="btnDif" style="display:none"><button class="btn btn-green" onclick="gerarFig()">Gerar minha figurinha!</button></div>
+  </div>
+</div>
+
+<!-- S7 -->
+<div class="screen" id="s7">
+  <div class="panel" style="max-width:700px">
+    <button class="btn-back" onclick="goTo(6)">&#8592; Voltar</button>
+    <div class="prog"><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div><div class="pd done"></div></div>
+    <div class="badge" style="display:block;text-align:center;margin-bottom:16px">Criando Meu Jogador — Completo!</div>
+    <h2 style="margin-bottom:20px">Sua figurinha oficial</h2>
+    <div style="display:flex;justify-content:center;padding:10px 0 20px">
+      <div class="fig-card-outer" id="figCard" style="width:280px;height:400px">
+        <svg width="280" height="400" viewBox="0 0 280 400" style="position:absolute;top:0;left:0" xmlns="http://www.w3.org/2000/svg">
+          <rect width="280" height="400" fill="#45BFBF"/>
+          <text x="-20" y="240" font-size="260" font-weight="900" fill="#29A84A" font-family="Arial Black,Arial" opacity="0.9">2</text>
+          <text x="88" y="284" font-size="260" font-weight="900" fill="#FFD600" font-family="Arial Black,Arial" opacity="0.8">6</text>
+          <rect x="88" y="90" width="140" height="178" fill="#29A84A" opacity="0.68"/>
+          <rect x="202" y="12" width="64" height="60" rx="10" fill="rgba(255,255,255,0.14)"/>
+          <text x="234" y="45" text-anchor="middle" font-size="15" font-weight="900" fill="#fff" font-family="Arial Black">26</text>
+          <ellipse cx="234" cy="56" rx="13" ry="5" fill="rgba(255,255,255,0.25)"/>
+          <text x="234" y="68" text-anchor="middle" font-size="7" fill="#fff" font-weight="700" font-family="Arial" letter-spacing="1.5">FIFA</text>
+          <circle cx="28" cy="28" r="22" fill="rgba(255,255,255,0.16)"/>
+          <circle cx="216" cy="286" r="22" fill="#009c3b"/>
+          <ellipse cx="216" cy="286" rx="17" ry="12" fill="#FEDF00"/>
+          <circle cx="216" cy="286" r="9" fill="#002776"/>
+          <text x="244" y="280" font-size="9" fill="#fff" font-weight="800" font-family="Arial">B</text>
+          <text x="244" y="291" font-size="9" fill="#fff" font-weight="800" font-family="Arial">R</text>
+          <text x="244" y="302" font-size="9" fill="#fff" font-weight="800" font-family="Arial">A</text>
+          <defs><linearGradient id="shine3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="transparent"/></linearGradient></defs>
+          <rect width="280" height="400" fill="url(#shine3)" opacity="0.08"/>
+        </svg>
+        <div id="figAvatarContainer" style="position:absolute;overflow:visible;transform-origin:top left;pointer-events:none"></div>
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:8px 10px 10px;z-index:10">
+          <div style="background:rgba(30,150,150,0.92);border-radius:14px;padding:8px 12px;margin-bottom:5px;text-align:center">
+            <div id="figName" style="font-size:13px;font-weight:900;color:#fff;letter-spacing:1.5px;text-transform:uppercase">JOGADOR</div>
+          </div>
+          <div style="display:flex;gap:5px">
+            <div style="flex:1;background:rgba(30,150,150,0.88);border-radius:10px;padding:5px 8px;text-align:center">
+              <div id="figPosText" style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.8);letter-spacing:1px;text-transform:uppercase">POSIÇÃO</div>
+            </div>
+            <div style="background:#e8c832;border-radius:10px;padding:5px 10px;display:flex;align-items:center">
+              <span style="font-size:9px;font-weight:900;color:#111;letter-spacing:.5px">PANINI</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:16px 0" id="figTagsRow"></div>
+    <div style="background:rgba(76,175,114,0.09);border:1px solid rgba(76,175,114,0.24);border-radius:16px;padding:20px;text-align:center">
+      <p style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.9">Parabéns! Você é um jogador incrível da Seleção da Sua Vida!<br><strong style="color:#ffc832">Você é único(a) e especial!</strong></p>
+    </div>
+    <div class="center mt" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-print" onclick="imprimirFiguinha()">🖨️ Imprimir figurinha</button>
+      <button class="btn btn-ghost" onclick="reiniciar()">Jogar de novo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var IMGS = {
+  boy_light:    'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Avatar+menino+(claro).png',
+  boy_dark:     'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Avatar+menina+(escuro).png',
+  girl_light:   'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Avatar+menina+(claro).png',
+  girl_dark:    'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Avatar+menina+(escuro).png',
+  hair_boy_1:   'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Cabelo+menino+1+(+liso+castanho).png',
+  hair_boy_2:   'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Cabelo+menino+2+(crespo+escurso).png',
+  hair_boy_3:   'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Cabelo+menino+3(verde+spike).png',
+  hair_girl_1:  'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Cabelo+menina+1+(rabos+castanhos).png',
+  hair_girl_2:  'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Cabelo+menina+2(crespo+preto).png',
+  hair_girl_3:  'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/cabelo+menina+3+(loiro+la%C3%A7os).png',
+  face_feliz:   'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/express%C3%A3o+feliz.png',
+  face_triste:  'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/express%C3%A3o+triste.png',
+  face_bravo:   'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Express%C3%A3o+bravo.png',
+  face_feliz_f: 'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/express%C3%A3o+feliz+menina.png',
+  face_triste_f:'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/express%C3%A3o+triste+menina.png',
+  face_bravo_f: 'https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/express%C3%A3o+bravo+menina.png'
+};
+
+var IMG_CFG = {
+  base_light:   {scale:2.4,  bottom:-9, x:-12},
+  base_dark:    {scale:2.35, bottom:0,  x:-27},
+  fig:          {scale:0.98, x:-71, y:-25},
+  hair_boy_1:   {scale:1.15, top:0,   left:4, w:210, h:150},
+  hair_boy_2:   {scale:1.0,  top:16,  left:4, w:220, h:165},
+  hair_boy_3:   {scale:1.15, top:-12, left:4, w:215, h:160},
+  hair_girl_1:  {scale:1.2,  top:44,  left:5, w:310, h:210},
+  hair_girl_2:  {scale:1.15, top:33,  left:4, w:260, h:190},
+  hair_girl_3:  {scale:1.0,  top:28,  left:4, w:320, h:220},
+  face_feliz:   {scale:1.4,  top:73,  left:4, w:120, h:90},
+  face_triste:  {scale:1.35, top:67,  left:4, w:120, h:90},
+  face_bravo:   {scale:1.25, top:78,  left:4, w:120, h:90},
+  face_feliz_f: {scale:1.45, top:70,  left:5, w:120, h:90},
+  face_triste_f:{scale:1.45, top:73,  left:4, w:186, h:90},
+  face_bravo_f: {scale:1.3,  top:78,  left:4, w:120, h:90},
+  logo:         {scale:1, x:552, y:42, w:265, h:67}
+};
+
+
+var FRASES = [
+  '"Cada jogador é único — assim como você!"',
+  '"Seu jeito de jogar também conta muito!"',
+  '"Não existe jogador perfeito — só jogadores que treinam!"',
+  '"Você é especial do seu jeito!"',
+  '"Todo campeão um dia foi iniciante!"'
+];
+
+var fraseIdx = 0;
+var st = {genero:'menino', skin:'light', hair:'', face:'', nome:'', posicao:'', fortes:[], difs:[]};
+
+function goTo(n) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('s' + n).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function iniciarJogo() {
+  goTo(1);
+}
+
+function abrirManual() {
+  document.getElementById('manualOverlay').classList.add('open');
+}
+
+function fecharManual() {
+  document.getElementById('manualOverlay').classList.remove('open');
+}
+
+function fecharManualFora(e) {
+  if (e.target === document.getElementById('manualOverlay')) fecharManual();
+}
+
+function getBaseCfg() {
+  return st.skin === 'dark' ? IMG_CFG.base_dark : IMG_CFG.base_light;
+}
+
+function applyBaseToEl(el) {
+  var key = st.skin === 'dark' ? 'base_dark' : 'base_light';
+  var scale  = IMG_CFG[key].scale;
+  var bottom = IMG_CFG[key].bottom;
+  var x      = IMG_CFG[key].x;
+  el.style.setProperty('opacity',          '1', 'important');
+  el.style.setProperty('transform',        'translateX(calc(-50% + ' + x + 'px)) scale(' + scale + ')', 'important');
+  el.style.setProperty('transform-origin', 'bottom center', 'important');
+  el.style.setProperty('left',             '50%', 'important');
+  el.style.setProperty('bottom',           bottom + 'px', 'important');
+  el.style.setProperty('object-fit',       'contain', 'important');
+  el.style.setProperty('object-position',  'center bottom', 'important');
+}
+
+function initImgs() {
+  var el;
+  el = document.getElementById('boyBaseThumb');  if (el) el.src = IMGS.boy_light;
+  el = document.getElementById('girlBaseThumb'); if (el) el.src = IMGS.girl_light;
+  el = document.getElementById('boyPlaceholder');  if (el) el.style.display = 'none';
+  el = document.getElementById('girlPlaceholder'); if (el) el.style.display = 'none';
+  rebuildHairRow();
+  rebuildFaceRow();
+  updateAvatar();
+}
+
+function escolherGenero(g) {
+  st.genero = g; st.hair = ''; st.face = ''; st.skin = 'light';
+  document.querySelectorAll('#grpSkin .skin-btn').forEach(function(b, i) {
+    if (i === 0) b.classList.add('sel'); else b.classList.remove('sel');
+  });
+  rebuildHairRow(); rebuildFaceRow(); updateAvatar(); goTo(3);
+}
+
+function selSkin(el, skin) {
+  document.querySelectorAll('#grpSkin .skin-btn').forEach(function(b) { b.classList.remove('sel'); });
+  el.classList.add('sel'); st.skin = skin; updateAvatar();
+}
+
+function rebuildHairRow() {
+  var row = document.getElementById('hairRow'); if (!row) return;
+  var hairs = st.genero === 'menino'
+    ? [{key:'hair_boy_1',label:'Liso'},{key:'hair_boy_2',label:'Crespo'},{key:'hair_boy_3',label:'Spike'}]
+    : [{key:'hair_girl_1',label:'Castanho'},{key:'hair_girl_2',label:'Crespo'},{key:'hair_girl_3',label:'Loiro'}];
+  row.innerHTML = '';
+  hairs.forEach(function(h) {
+    var wrap = document.createElement('div');
+    var opt = document.createElement('div');
+    opt.className = 'hair-opt' + (st.hair === h.key ? ' sel' : '');
+    opt.onclick = (function(el2, key) { return function() { selHair(el2, key); }; })(opt, h.key);
+    var img = document.createElement('img'); img.src = IMGS[h.key]; img.alt = h.label;
+    opt.appendChild(img);
+    var lbl = document.createElement('div'); lbl.className = 'hair-opt-lbl'; lbl.textContent = h.label;
+    wrap.appendChild(opt); wrap.appendChild(lbl); row.appendChild(wrap);
+  });
+}
+
+function rebuildFaceRow() {
+  var isMenina = st.genero === 'menina';
+  var faces = [
+    {name:'feliz',  label:'Feliz',  key: isMenina ? 'face_feliz_f'  : 'face_feliz'},
+    {name:'triste', label:'Triste', key: isMenina ? 'face_triste_f' : 'face_triste'},
+    {name:'bravo',  label:'Bravo',  key: isMenina ? 'face_bravo_f'  : 'face_bravo'}
+  ];
+  var row = document.getElementById('faceRow'); if (!row) return;
+  row.innerHTML = '';
+  faces.forEach(function(f) {
+    var wrap = document.createElement('div');
+    var opt = document.createElement('div'); opt.className = 'face-opt';
+    opt.onclick = (function(nome, key) {
+      return function() {
+        document.querySelectorAll('#faceRow .face-opt').forEach(function(e) { e.classList.remove('sel'); });
+        opt.classList.add('sel'); st.face = nome;
+        var face = document.getElementById('avFace'); var src = IMGS[key];
+        if (face && src) {
+          face.src = src; face.setAttribute('src', src);
+          applyLayer(face, IMG_CFG[key] || {scale:1, top:145, left:0, w:120, h:90});
+          face.style.setProperty('opacity', '1', 'important');
+          face.style.setProperty('display', 'block', 'important');
+        }
+      };
+    })(f.name, f.key);
+    var img = document.createElement('img'); img.src = IMGS[f.key] || ''; img.alt = f.label;
+    opt.appendChild(img);
+    var lbl = document.createElement('div'); lbl.className = 'face-opt-lbl'; lbl.textContent = f.label;
+    wrap.appendChild(opt); wrap.appendChild(lbl); row.appendChild(wrap);
+  });
+}
+
+function selHair(el, key) {
+  document.querySelectorAll('#hairRow .hair-opt').forEach(function(e) { e.classList.remove('sel'); });
+  el.classList.add('sel'); st.hair = key; updateAvatar();
+  fraseIdx = (fraseIdx + 1) % FRASES.length;
+  var q = document.getElementById('qFrase'); if (q) q.textContent = FRASES[fraseIdx];
+}
+
+function applyLayer(el, cfg) {
+  if (!el) return;
+  var sw = cfg.w * cfg.scale; var sh = cfg.h * cfg.scale;
+  var lx = (420 / 2) - (sw / 2) + (cfg.left || 0);
+  el.style.setProperty('left',      lx + 'px', 'important');
+  el.style.setProperty('top',       cfg.top + 'px', 'important');
+  el.style.setProperty('width',     sw + 'px', 'important');
+  el.style.setProperty('height',    sh + 'px', 'important');
+  el.style.setProperty('transform', 'none', 'important');
+}
+
+function updateAvatar() {
+  var avatarKey = st.genero === 'menino'
+    ? (st.skin === 'dark' ? 'boy_dark' : 'boy_light')
+    : (st.skin === 'dark' ? 'girl_dark' : 'girl_light');
+  var base = document.getElementById('avBase');
+  var hair = document.getElementById('avHair');
+  var face = document.getElementById('avFace');
+  if (base && IMGS[avatarKey]) { base.src = IMGS[avatarKey]; applyBaseToEl(base); }
+  if (hair) {
+    if (st.hair && IMGS[st.hair]) {
+      hair.src = IMGS[st.hair];
+      applyLayer(hair, IMG_CFG[st.hair] || {scale:1, top:35, left:4, w:260, h:210});
+      hair.style.setProperty('opacity', '1', 'important');
+    } else { hair.removeAttribute('src'); hair.style.setProperty('opacity', '0', 'important'); }
+  }
+  if (face) {
+    if (st.face) {
+      var faceImgKey = st.genero === 'menina' ? 'face_' + st.face + '_f' : 'face_' + st.face;
+      var src = IMGS[faceImgKey];
+      if (src) {
+        face.src = src; face.setAttribute('src', src);
+        applyLayer(face, IMG_CFG[faceImgKey] || {scale:1, top:145, left:4, w:120, h:90});
+        face.style.setProperty('opacity', '1', 'important');
+      }
+    } else { face.removeAttribute('src'); face.style.setProperty('opacity', '0', 'important'); }
+  }
+  if (document.getElementById('s7').classList.contains('active')) updateFigClone();
+}
+
+function updateFigClone() {
+  var src = document.getElementById('avatarWrap');
+  var dst = document.getElementById('figAvatarContainer');
+  if (!src || !dst) return;
+  var clone = src.cloneNode(true);
+  var srcEls = src.querySelectorAll('img'); var dstEls = clone.querySelectorAll('img');
+  for (var i = 0; i < srcEls.length; i++) {
+    if (dstEls[i]) dstEls[i].setAttribute('style', srcEls[i].getAttribute('style') || '');
+  }
+  clone.style.position = 'relative'; clone.style.transformOrigin = 'top left';
+  dst.innerHTML = ''; dst.appendChild(clone); applyFigCfg();
+}
+
+function applyFigCfg() {
+  var dst = document.getElementById('figAvatarContainer');
+  if (!dst || !dst.firstChild) return;
+  var fc = IMG_CFG.fig;
+  dst.style.transform = 'scale(' + fc.scale + ')';
+  dst.style.transformOrigin = 'top left';
+  dst.style.left = fc.x + 'px'; dst.style.top = fc.y + 'px'; dst.style.position = 'absolute';
+}
+
+function irPos() {
+  st.nome = document.getElementById('nomeInput').value.trim() || (st.genero === 'menino' ? 'Jogador' : 'Jogadora');
+  goTo(4);
+}
+
+function selPos(el, nome, desc) {
+  document.querySelectorAll('.pcard').forEach(function(c) { c.classList.remove('sel'); });
+  el.classList.add('sel'); st.posicao = nome;
+  document.getElementById('devPosTxt').innerHTML = '<strong>' + nome + ':</strong> ' + desc + '<br><br><em>Não existe posição certa ou errada.</em>';
+  document.getElementById('devPos').style.display = 'block';
+  document.getElementById('btnPos').style.display = 'block';
+}
+
+function addTag(tipo) {
+  var inputId = tipo === 'fortes' ? 'fortesInput' : 'difInput';
+  var gridId  = tipo === 'fortes' ? 'tagsFortes'  : 'tagsDif';
+  var inp = document.getElementById(inputId); var val = inp.value.trim(); if (!val) return;
+  var tag = document.createElement('div');
+  tag.className = tipo === 'fortes' ? 'tag sel' : 'tag tag-dif sel';
+  tag.textContent = val; tag.onclick = function() { tag.classList.toggle('sel'); };
+  document.getElementById(gridId).appendChild(tag); inp.value = '';
+}
+
+function mostrarFortes() {
+  var tags = Array.from(document.querySelectorAll('#s5 .tag.sel')).map(function(t) { return t.textContent; });
+  st.fortes = tags;
+  document.getElementById('msgFortesTxt').innerHTML = tags.length
+    ? '<strong>Que time incrível!</strong><br><br>Você é ' + tags.join(', ') + '.<br><br>Essas qualidades fazem o time da sua vida mais forte!'
+    : 'Selecione ou escreva pelo menos uma qualidade.';
+  document.getElementById('msgFortes').style.display = 'block';
+  document.getElementById('btnFortes').style.display = 'block';
+}
+
+function mostrarTCC() {
+  var tags = Array.from(document.querySelectorAll('#s6 .tag.sel')).map(function(t) { return t.textContent; });
+  st.difs = tags;
+  document.getElementById('msgTCCTxt').innerHTML = '<strong>Que corajoso(a) você é!</strong><br><br>Reconhecer seus desafios não é fraqueza — é o primeiro passo para crescer!<br><br>Todo grande jogador já errou, caiu e treinou de novo.';
+  document.getElementById('msgTCC').style.display = 'block';
+  document.getElementById('btnDif').style.display = 'block';
+}
+
+function gerarFig() {
+  var nameEl = document.getElementById('figName'); var posEl = document.getElementById('figPosText');
+  if (nameEl) nameEl.textContent = (st.nome || 'JOGADOR').toUpperCase();
+  if (posEl)  posEl.textContent  = st.posicao.toUpperCase();
+  updateFigClone();
+  var row = document.getElementById('figTagsRow'); row.innerHTML = '';
+  st.fortes.concat(st.difs).slice(0, 7).forEach(function(t) {
+    var sp = document.createElement('span');
+    sp.style.cssText = 'background:rgba(255,200,50,0.1);border:1px solid rgba(255,200,50,0.28);color:#ffc832;font-size:11px;padding:5px 13px;border-radius:50px;font-weight:700';
+    sp.textContent = t; row.appendChild(sp);
+  });
+  goTo(7);
+}
+
+function reiniciar() {
+  st = {genero:'menino', skin:'light', hair:'', face:'', nome:'', posicao:'', fortes:[], difs:[]};
+  document.querySelectorAll('.tag,.tag-dif,.pcard').forEach(function(t) { t.classList.remove('sel'); });
+  document.querySelectorAll('input[type=text]').forEach(function(f) { f.value = ''; });
+  ['msgFortes','msgTCC','devPos'].forEach(function(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  ['btnPos','btnFortes','btnDif'].forEach(function(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  document.querySelectorAll('#grpSkin .skin-btn').forEach(function(b, i) {
+    if (i === 0) b.classList.add('sel'); else b.classList.remove('sel');
+  });
+  goTo(1);
+}
+
+
+
+
+
+
+
+
+
+
+// ── ÁUDIO & VOLUME ──
+var audio = document.getElementById('bgMusic');
+var muted = false;
+var lastVol = 0.6;
+
+audio.volume = 0.6;
+
+// Pula os primeiros 20 segundos e toca imediatamente
+function tryPlay() {
+  audio.currentTime = 20;
+  var p = audio.play();
+  if (p && p.catch) p.catch(function() {
+    // Fallback: toca no primeiro evento de interação do usuário
+    var events = ['click','touchstart','keydown','mousedown'];
+    function onInteract() {
+      audio.currentTime = 20;
+      audio.play();
+      events.forEach(function(e) { document.removeEventListener(e, onInteract); });
+    }
+    events.forEach(function(e) { document.addEventListener(e, onInteract); });
+  });
+}
+
+// Tenta tocar assim que o áudio estiver pronto
+if (audio.readyState >= 2) {
+  tryPlay();
+} else {
+  audio.addEventListener('canplay', function once() {
+    audio.removeEventListener('canplay', once);
+    tryPlay();
+  });
+  // Também tenta imediatamente (alguns browsers ignoram readyState)
+  tryPlay();
+}
+
+function setVolume(val) {
+  var v = parseInt(val) / 100;
+  audio.volume = v;
+  lastVol = v;
+  muted = (v === 0);
+  document.getElementById('volLabel').textContent = val + '%';
+  document.getElementById('volumeIco').textContent = v === 0 ? '🔇' : '🎵';
+}
+
+function toggleMute() {
+  if (muted) {
+    audio.volume = lastVol || 0.6;
+    document.getElementById('volumeSlider').value = Math.round((lastVol || 0.6) * 100);
+    document.getElementById('volLabel').textContent = Math.round((lastVol || 0.6) * 100) + '%';
+    document.getElementById('volumeIco').textContent = '🎵';
+    muted = false;
+  } else {
+    lastVol = audio.volume;
+    audio.volume = 0;
+    document.getElementById('volumeSlider').value = 0;
+    document.getElementById('volLabel').textContent = '0%';
+    document.getElementById('volumeIco').textContent = '🔇';
+    muted = true;
+  }
+}
+
+// ── IMPRIMIR FIGURINHA ──
+function imprimirFiguinha() {
+  window.print();
+}
+
+initImgs();
+</script>
+</body>
+</html>
